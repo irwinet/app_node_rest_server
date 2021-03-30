@@ -2,6 +2,7 @@ const { response } = require("express");
 const Usuario = require('../models/usuario');
 const bcryptjs = require('bcryptjs');
 const { generarJWT } = require("../helpers/generar-jwt");
+const { googleVerify } = require("../helpers/google-verify");
 
 const login = async(req, res = response) => {
     const { correo, password } = req.body;
@@ -44,13 +45,25 @@ const login = async(req, res = response) => {
     }
 }
 
-const googleSignin = (req, res = response) => {
+const googleSignin = async(req, res = response) => {
+
     const { id_token } = req.body;
 
-    res.json({
-        msg: 'Todo ok! google signin',
-        id_token
-    });
+    try {
+
+        const googleUser = await googleVerify(id_token);
+
+        console.log(googleUser);
+
+        res.json({
+            msg: 'Todo ok! google signin',
+            googleUser
+        });
+    } catch (error) {
+        res.status(400).json({
+            msg: 'Token de Google no es valido'
+        });
+    }
 }
 
 module.exports = {
